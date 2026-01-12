@@ -6,6 +6,7 @@
 
 #include "emulator/rv32izicsr.h"
 #include "emulator/mmio/tty.h"
+#include "emulator/mmio/tilegpu.h"
 
 static void load_bin_file(const char *filename, void *dest, size_t dest_size) {
     FILE *fptr = fopen(filename, "r");
@@ -34,8 +35,10 @@ int main(int argc, char **argv) {
     RV32IZicsr_InitState(&state);
 
     /* Init MMIO Devices */
-    /* Init TTY */
     Tty_Init();
+
+    if (argv[2] != NULL)
+    TileGpu_Init(argv[2]);
 
     while (1) {
         Tty_Tick();

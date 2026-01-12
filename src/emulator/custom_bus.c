@@ -3,6 +3,7 @@
 #include "mmio/tty.h"
 #include "mmio/rng.h"
 #include "mmio/disk.h"
+#include "mmio/tilegpu.h"
 
 uint32_t External_RV32IZicsr_LoadHandlerU8(uint8_t *image, uint32_t offset) {
     if (Tty_OffsetInteraction(offset)) {
@@ -49,12 +50,18 @@ void External_RV32IZicsr_StoreHandlerU8(uint8_t *image, uint32_t offset, uint32_
     if (Disk_OffsetInteraction(offset)) {
         return Disk_ByteStore(offset, value);
     }
+    if (TileGpu_OffsetInteraction(offset)) {
+        return TileGpu_ByteStore(offset, value);
+    }
     (*(uint8_t *)(image + (offset & RV32IZicsr_RAM_MASK)) = value);
 }
 
 void External_RV32IZicsr_StoreHandlerU16(uint8_t *image, uint32_t offset, uint32_t value) {
     if (Disk_OffsetInteraction(offset)) {
         return Disk_HalfStore(offset, value);
+    }
+    if (TileGpu_OffsetInteraction(offset)) {
+        return TileGpu_HalfStore(offset, value);
     }
     (*(uint16_t *)(image + (offset & RV32IZicsr_RAM_MASK)) = value);
 }

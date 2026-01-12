@@ -71,12 +71,19 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
          uint32_t addr = rs1val + i_imm;
          if (rd) {
             switch (funct3) {
-               case 0: REG(rd) = RV32IZicsr_LoadS8(image, addr); break;
-               case 1: REG(rd) = RV32IZicsr_LoadS16(image, addr); break;
-               case 2: REG(rd) = RV32IZicsr_LoadU32(image, addr); break;
-               case 3: REG(rd) = RV32IZicsr_LoadU8(image, addr); break;
-               case 4: REG(rd) = RV32IZicsr_LoadU8(image, addr); break;
-               case 5: REG(rd) = RV32IZicsr_LoadU16(image, addr); break;
+               case 0: 
+                  REG(rd) = RV32IZicsr_LoadS8(image, addr); break;
+               case 1:
+                  if (addr & 0x1) { REG(rd) = 0; break; }
+                  REG(rd) = RV32IZicsr_LoadS16(image, addr); break;
+               case 2:
+                  if (addr & 0x3) { REG(rd) = 0; break; }
+                  REG(rd) = RV32IZicsr_LoadU32(image, addr); break;
+               case 4: 
+                  REG(rd) = RV32IZicsr_LoadU8(image, addr); break;
+               case 5:
+                  if (addr & 0x1) { REG(rd) = 0; break; }
+                  REG(rd) = RV32IZicsr_LoadU16(image, addr); break;
             }
          }
          pc = pc + 4;
@@ -86,8 +93,12 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
          uint32_t addr = rs1val + s_imm;
          switch (funct3) {
             case 0: RV32IZicsr_StoreU8(image, addr, rs2val); break;
-            case 1: RV32IZicsr_StoreU16(image, addr, rs2val); break;
-            case 2: RV32IZicsr_StoreU32(image, addr, rs2val); break;
+            case 1: 
+               if (addr & 0x1) RV32IZicsr_StoreU32(image, addr, 0);
+               RV32IZicsr_StoreU16(image, addr, rs2val); break;
+            case 2: 
+               if (addr & 0x3) RV32IZicsr_StoreU32(image, addr, 0);
+               RV32IZicsr_StoreU32(image, addr, rs2val); break;
          }
          pc = pc + 4;
          break;
@@ -112,7 +123,7 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
             else if (funct3 == 0x5 && !funct7) // SRL
                REG(rd) = rs1val >> (opcode == 0x13 ? shamt : s2);
             else if (funct3 == 0x5 && funct7) // SRA
-               REG(rd) = ((rs1val >> s2) | (~0U << (opcode == 0x13 ? shamt : s2)));
+               REG(rd) = ((rs1val >> (opcode == 0x13 ? shamt : s2)) | (~0U << (opcode == 0x13 ? shamt : s2)));
             else if (funct3 == 0x6) // OR
                REG(rd) = rs1val | s2;
             else if (funct3 == 0x7) // AND

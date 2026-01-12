@@ -1,10 +1,6 @@
-#ifndef MEMORYMAP_H
-#define MEMORYMAP_H
+#pragma once
 
-// Note that the post interface is just a indicator to the user,
-// you can decide how to encode the fail cause.
-#define POST_SUCCESS 2
-#define POST_FAILURE 1
+// POST
 #define POST_RESULT     (0xFFF8) // Power-On Self Test Result (0 = pass, 1 = fail)
 #define POST_FAIL_CAUSE (0xFFF7) // Power-On Self Test Fail Cause
 
@@ -29,8 +25,10 @@
 #define DIV_QUO    (0xFFD8) // Divider Quotient Output
 #define DIV_REM    (0xFFD4) // Divider Remainder Output
 
+// RNG
 #define RANDOM_BYTE (0xFFD3) // RNG 0-255
 
+// RGB DISPLAY 1
 #define RGB_X (0xFFD2) 
 #define RGB_Y (0xFFD1) 
 #define RGB_R (0xFFD0) 
@@ -39,6 +37,15 @@
 #define RGB_CLEARSCREEN (0xFFCD) 
 #define RGB_WRITE (0xFFCC)
 
+// TILEGPU
+#define TILEGPU_X           (0xFFFF)
+#define TILEGPU_Y           (0xFFFE)
+#define TILEGPU_ADDR        (0xFFFC)
+#define TILEGPU_FX_OPCODE   (0xFFFB)
+#define TILEGPU_FX_IMM      (0xFFFA)
+#define TILEGPU_DRAW        1
+#define TILEGPU_CLEAR       2
+#define TILEGPU_CONTROLS    (0xFFF9)
 
 #define LED_LIGHT (0xFFCB)
 
@@ -46,5 +53,3 @@
 #define DISK_DATA (0xFFC6)
 #define DISK_OUT (0xFFC4)
 #define DISK_WRITE (0xFFC3)
-
-#endif // MEMORYMAP_H

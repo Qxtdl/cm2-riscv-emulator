@@ -26,16 +26,16 @@ static int kbhit(void) {
     }
 }
 
+static void draw(void) {
+    mvaddch((tty_loc >> 5) & 0x07, (tty_loc & 0x1f), tty_char);
+    refresh();
+}
+
 void Tty_Tick(void) {
     if (kbhit()) {
         user_ascii = getch();
         user_ready = true;
     }
-}
-
-static void draw(void) {
-    mvaddch((tty_loc >> 5) & 0x07, (tty_loc & 0x1f), tty_char);
-    refresh();
 }
 
 bool Tty_OffsetInteraction(uint32_t offset) {
@@ -58,23 +58,16 @@ uint32_t Tty_ByteLoad(uint32_t offset) {
                 return !user_ready;
             }
             break;
-        case USER_ASCII:
-            return user_ascii;
-            break;
-        case TTY_LOC:
-            return tty_loc;
+        case USER_ASCII: return user_ascii; break;
+        case TTY_LOC: return tty_loc;
     }
     return 0;
 }
 
 void Tty_ByteStore(uint32_t offset, uint32_t value) {
     switch (offset) {
-        case TTY_LOC:
-            tty_loc = value;
-            break;
-        case TTY_CHAR:
-            tty_char = value;
-            break;
+        case TTY_LOC: tty_loc = value; break;
+        case TTY_CHAR: tty_char = value; break;
         case TTY_WRITE:
             draw();
             break;

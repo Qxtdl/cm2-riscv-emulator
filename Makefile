@@ -36,7 +36,7 @@ $(OUTPUT): $(OBJS)
 	gcc $(CFLAGS) $(OBJS) -o $(OUTPUT)
 
 run:
-	./$(OUTPUT) $(OUTPUT_ARGS)
+	$(OUTPUT) $(OUTPUT_ARGS)
 
 clean:
 	rm -rf $(BUILD)

@@ -3,11 +3,13 @@
 #include "tty.h"
 #include "mmio_map.h"
 
+#include "../../console.h"
+
 void Tty_Init(void) {
-    initscr();
-    cbreak();
-    noecho();
-    nodelay(stdscr, TRUE);
+    // initscr();
+    // cbreak();
+    // noecho();
+    // nodelay(stdscr, TRUE);
 }
 
 static uint8_t tty_loc;
@@ -15,25 +17,14 @@ static uint8_t tty_char;
 static uint8_t user_ascii;
 static uint8_t user_ready;
 
-static int kbhit(void) {
-    int ch = getch();
-
-    if (ch != ERR) {
-        ungetch(ch);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
 static void draw(void) {
-    mvaddch((tty_loc >> 5) & 0x07, (tty_loc & 0x1f), tty_char);
-    refresh();
+    wmove(tty_window, ((tty_loc >> 5) & 0x07) + 1, (tty_loc & 0x1f));
+    waddch(tty_window, tty_char);
 }
 
 void Tty_Tick(void) {
-    if (kbhit()) {
-        user_ascii = getch();
+    if (console_window_kbhit(FOCUSED_WINDOW_TTY)) {
+        user_ascii = console_window_getch(FOCUSED_WINDOW_TTY);
         user_ready = true;
     }
 }

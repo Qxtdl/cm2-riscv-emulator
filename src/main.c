@@ -4,6 +4,9 @@
 #include "global.h"
 #include "util.h"
 
+#include "console.h"
+#include "debug.h"
+
 #include "emulator/rv32izicsr.h"
 #include "emulator/mmio/tty.h"
 
@@ -35,6 +38,9 @@ int main(int argc, char **argv) {
 
     image = scalloc(1, RV32IZicsr_RAM_SIZE);
 
+    /* Init Console */
+    console_create_windows();
+
     /* Init RV32I */
     load_bin_file(argv[1], image, RV32IZicsr_RAM_SIZE);
     RV32IZicsr_InitState(&state);
@@ -55,6 +61,9 @@ int main(int argc, char **argv) {
     #endif
 
     while (1) {
+        console_tick();
+        debug_console_tick();
+
         Tty_Tick();
         RV32IZicsr_Step(&state, image);
     }

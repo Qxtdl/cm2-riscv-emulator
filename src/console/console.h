@@ -11,6 +11,9 @@ extern enum focused_window {
 extern WINDOW *tty_window;
 extern WINDOW *dbg_console_window;
 
+extern bool tty_window_dirty;
+extern bool dbg_console_window_dirty;
+
 void console_create_windows(void);
 void console_tick(void);
 int console_window_kbhit(enum focused_window window);

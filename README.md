@@ -21,7 +21,7 @@ The emulator has a debugger console that can be accessed by pressing `ctrl+w`.
 |---------|-------------|
 | `exit` | exit the emulator |
 | `clear` | clear the debugger console |
-| `break pop` | remove a the last breakpoint |
+| `break pop` | remove the last breakpoint |
 | `break continue` | continue exectution from a breakpoint |
 | `break <address>` | add a breakpoint at the address given, accepts hex, binary and decimal. |
 

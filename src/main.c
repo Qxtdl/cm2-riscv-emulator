@@ -30,6 +30,7 @@ static void load_bin_file(const char *filename, void *dest, size_t dest_size) {
 }
 
 struct RV32IZicsr_State state;
+int cpu_speed = 10000;
 uint8_t *image = NULL;
 
 int main(int argc, char **argv) {
@@ -65,8 +66,14 @@ int main(int argc, char **argv) {
         console_tick();
         debug_console_tick();
         Tty_Tick();
+        #ifdef RAYLIB
+        TileGpu_Tick();
+        #endif
         if (state.running) {
-            RV32IZicsr_Step(&state, image);
+            for (int i = 0; i < cpu_speed; i++)
+            {
+                RV32IZicsr_Step(&state, image);
+            }
         }
     }
 }

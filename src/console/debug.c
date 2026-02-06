@@ -3,8 +3,11 @@
 #include <string.h>
 #include <ncurses.h>
 
+#include "../util.h"
 #include "console.h"
 #include "breakpoint.h"
+
+extern int cpu_speed;
 
 int puts_y = 1;
 int puts_x = 1;
@@ -46,9 +49,11 @@ void handle_command(char *cmd) {
     else if (!strncmp(cmd, "break", 5)) {
         breakpoint_cmd(cmd);
     }
+    else if (!strncmp(cmd, "cpu speed", 9)) {
+        strtok(cmd + 8, " ");
+        cpu_speed = str_literal_to_ul(strtok(NULL, " "));
+    }
 }
-
-
 
 void debug_console_tick(void) {
     breakpoint_tick();

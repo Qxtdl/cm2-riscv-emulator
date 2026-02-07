@@ -1,9 +1,11 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 void *smalloc(size_t size);
 void *srealloc(void *ptr, size_t size);
 void *scalloc(size_t nmemb, size_t size);
 int random_int(int min, int max);
+const char *u32_to_hex(uint32_t value);
 unsigned long str_literal_to_ul(const char *s);

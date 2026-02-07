@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <stddef.h>
 #include <time.h>
@@ -29,6 +30,17 @@ void *scalloc(size_t nmemb, size_t size) {
 int random_int(int min, int max) {
     srand(time(NULL));
     return min + rand() % (max + 1  - min);
+}
+
+const char *u32_to_hex(uint32_t value) {
+    static const char lookup[] = "0123456789ABCDEF";
+    static char buf[9];
+    for (int i = 0; i < 8; i++) {
+        buf[7 - i] = lookup[value & 0xf];
+        value >>= 4;
+    }
+    buf[8] = '\0';
+    return buf;
 }
 
 unsigned long str_literal_to_ul(const char *s) {

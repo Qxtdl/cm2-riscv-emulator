@@ -2,6 +2,8 @@
 
 #include <ncurses.h>
 
+#include "window.h"
+
 extern enum focused_window {
     FOCUSED_WINDOW_TTY,
     FOCUSED_WINDOW_DBG_CONSOLE,

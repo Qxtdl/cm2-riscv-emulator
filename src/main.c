@@ -5,7 +5,7 @@
 #include "global.h"
 #include "util.h"
 
-#include "console/console.h"
+#include "console/console/console.h"
 #include "console/debug.h"
 
 #include "emulator/rv32izicsr.h"
@@ -30,8 +30,13 @@ static void load_bin_file(const char *filename, void *dest, size_t dest_size) {
 }
 
 struct RV32IZicsr_State state;
+bool cpu_running = true;
 int cpu_speed = 10000;
 uint8_t *image = NULL;
+
+void cpu_step(void) {
+    RV32IZicsr_Step(&state, image);
+}
 
 int main(int argc, char **argv) {
     if (argc <= 1) {
@@ -65,14 +70,15 @@ int main(int argc, char **argv) {
     while (1) {
         console_tick();
         debug_console_tick();
+        
         Tty_Tick();
         #ifdef RAYLIB
         TileGpu_Tick();
         #endif
-        if (state.running) {
+        if (cpu_running) {
             for (int i = 0; i < cpu_speed; i++)
             {
-                RV32IZicsr_Step(&state, image);
+                cpu_step();
             }
         }
     }

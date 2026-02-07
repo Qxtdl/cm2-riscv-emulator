@@ -3,7 +3,7 @@
 #include "tty.h"
 #include "mmio_map.h"
 
-#include "../../console/console.h"
+#include "../../console/console/console.h"
 
 void Tty_Init(void) {
     // initscr();
@@ -18,9 +18,9 @@ static uint8_t user_ascii;
 static uint8_t user_ready;
 
 static void draw(void) {
-    wmove(tty_window, ((tty_loc >> 5) & 0x07) + 1, (tty_loc & 0x1f) + 1);
-    waddch(tty_window, tty_char);
-    tty_window_dirty = true;
+    wmove(find_window("tty")->window, ((tty_loc >> 5) & 0x07) + 1, (tty_loc & 0x1f) + 1);
+    waddch(find_window("tty")->window, tty_char);
+    find_window("tty")->dirty = true;
 }
 
 void Tty_Tick(void) {
@@ -64,6 +64,6 @@ void Tty_ByteStore(uint32_t offset, uint32_t value) {
             draw();
             break;
         case TTY_CLEAR:
-            wclear(tty_window);
+            wclear(find_window("tty")->window);
     }
 }

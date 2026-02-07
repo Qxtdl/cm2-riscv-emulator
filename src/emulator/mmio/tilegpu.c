@@ -9,12 +9,12 @@
 
 #define SCREEN_Y_SIZE 256
 #define SCREEN_X_SIZE 256
-#define SCALE 4
+int scale = 4;
 
 Texture tilesheet;
 
 void TileGpu_Init(const char *bitmap_filename) {
-    InitWindow(SCREEN_X_SIZE * SCALE, SCREEN_Y_SIZE * SCALE, "TileGPU");
+    InitWindow(SCREEN_X_SIZE * scale, SCREEN_Y_SIZE * scale, "TileGPU");
     SetTargetFPS(60);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 
@@ -37,7 +37,7 @@ void TileGpu_Tick(void) {
     for (int i = 0; i < SCREEN_Y_SIZE - 1; i++) {
         for (int j = 0; j < SCREEN_X_SIZE - 1; j++) {
             Rectangle sourceTile = { framebuffer[i][j] * 8, ((framebuffer[i][j]) >> 5) * 8, (float)8, (float)8 };
-            Rectangle dest = {0.0f, 0.0f, (float)tilesheet.width/SCALE, (float)tilesheet.height/SCALE};
+            Rectangle dest = {0.0f, 0.0f, (float)tilesheet.width/scale, (float)tilesheet.height/scale};
             Vector2 origin = {-j * 64, -i * 64};
 
             DrawTexturePro(

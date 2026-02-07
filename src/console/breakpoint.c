@@ -2,7 +2,6 @@
 
 #include "../util.h"
 #include "console/console.h"
-#include "debug.h"
 #include "../emulator/rv32izicsr.h"
 
 extern void cpu_step(void);
@@ -23,7 +22,7 @@ void breakpoint_tick(void) {
     }
 }
 
-void breakpoint_cmd(char *arg) {
+static void breakpoint_cmd(char *arg) {
     breakpoints = srealloc(breakpoints, ++breakpoints_size * sizeof(uint32_t));
     if (!strcmp(arg, "pc")) breakpoints[breakpoints_size - 1] = state.pc;
     else breakpoints[breakpoints_size - 1] = str_literal_to_ul(arg);
@@ -31,7 +30,7 @@ void breakpoint_cmd(char *arg) {
     find_window("debug")->dirty = true;
 }
 
-void breakpoint_pop_cmd(void) {
+static void breakpoint_pop_cmd(void) {
     if (breakpoints_size == 0) {
         window_puts("debug","Break stack empty.");
         find_window("debug")->dirty = true;
@@ -41,19 +40,19 @@ void breakpoint_pop_cmd(void) {
     else breakpoints = srealloc(breakpoints, --breakpoints_size * sizeof(uint32_t));
 }
 
-void breakpoint_ls_cmd(void) {
+static void breakpoint_ls_cmd(void) {
     for (size_t i = 0; i < breakpoints_size; i++) {
         window_puts("debug", u32_to_hex(breakpoints[i]));
     }
 }
 
-void breakpoint_step_cmd(char *arg) {
+static void breakpoint_step_cmd(char *arg) {
     for (unsigned long i = 0; i < str_literal_to_ul(arg); i++) {
         cpu_step();
     }
 }
 
-void break_continue_cmd(void) {
+static void break_continue_cmd(void) {
     cpu_running = true;
 }
 

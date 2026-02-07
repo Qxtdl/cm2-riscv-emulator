@@ -7,6 +7,7 @@
 #include "console/window.h"
 #include "console/console.h"
 #include "breakpoint.h"
+#include "cpu.h"
 
 #include "../emulator/rv32izicsr.h"
 #include "../emulator/mmio/tilegpu.h"
@@ -28,7 +29,7 @@ void handle_command(char *cmd) {
         update_window("debug");
     }
     else if (!strncmp(cmd, "cpu", 3)) {
-        //handle_cpu_command(cmd);
+        handle_cpu_command(cmd);
     }
     else if (!strncmp(cmd, "break", 5)) {
         handle_break_command(cmd);

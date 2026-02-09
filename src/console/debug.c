@@ -6,6 +6,7 @@
 #include "../util.h"
 #include "console/window.h"
 #include "console/console.h"
+
 #include "breakpoint.h"
 #include "cpu.h"
 

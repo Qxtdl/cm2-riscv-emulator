@@ -51,14 +51,21 @@ static void breakpoint_cmd(char *arg) {
     find_window("debug")->dirty = true;
 }
 
-static void breakpoint_pop_cmd(void) {
+static void breakpoint_pop_cmd(char *arg) {
     if (breakpoints_size == 0) {
         window_puts("debug","Break stack empty.");
         find_window("debug")->dirty = true;
         return;
     }
-    if (breakpoints_size == 1) { breakpoints = NULL; breakpoints_size--; }
-    else breakpoints = srealloc(breakpoints, --breakpoints_size * sizeof(*breakpoints));
+    if (arg && !strcmp(arg, "all")) {
+    	breakpoints = NULL;
+    	breakpoints_size = 0;
+    	return;
+    }
+    for (unsigned long i = 0; i < (arg ? str_literal_to_ul(arg) : 1); i++) {
+    	if (breakpoints_size == 1) { breakpoints = NULL; breakpoints_size--; }
+    	else breakpoints = srealloc(breakpoints, --breakpoints_size * sizeof(*breakpoints));
+    }
 }
 
 static void breakpoint_ls_cmd(void) {
@@ -70,7 +77,7 @@ static void breakpoint_ls_cmd(void) {
 }
 
 static void breakpoint_step_cmd(char *arg) {
-    for (unsigned long i = 0; i < str_literal_to_ul(arg); i++) {
+    for (unsigned long i = 0; i < (arg ? str_literal_to_ul(arg) : 1); i++) {
         cpu_step();
     }
 }
@@ -85,7 +92,7 @@ void handle_break_command(char *cmd) {
     char *subcommand = strtok(NULL, " ");
 
     if (!strncmp(subcommand, "pop", 3)) {
-        breakpoint_pop_cmd();
+        breakpoint_pop_cmd(strtok(NULL, " "));
     }
     else if (!strncmp(subcommand, "ls", 2)) {
         breakpoint_ls_cmd();

@@ -1,29 +1,36 @@
 #include <string.h>
+#include <stdbool.h>
 
 #include "../util.h"
 #include "console/console.h"
 #include "../emulator/rv32izicsr.h"
+
+#include "../riscv.h"
 
 extern void cpu_step(void);
 
 extern struct RV32IZicsr_State state;
 extern bool cpu_running;
 
-struct {
+struct breakpoint {
 	uint32_t address;
 	enum {
 		BREAKPOINT_TYPE_PC,
 		BREAKPOINT_TYPE_MEM
 	} type;
+	bool occupied;
 } *breakpoints = NULL;
 size_t breakpoints_size = 0;
 
 void breakpoint_tick(void) {
     if (!cpu_running) return;
     for (size_t i = 0; i < breakpoints_size; i++) {
+    	if (!breakpoints[i].occupied) continue;
         if (breakpoints[i].type == BREAKPOINT_TYPE_PC && state.pc == breakpoints[i].address) {
             cpu_running = false;
             window_puts("debug", "PC breakpoint hit");
+            window_puts("debug", " >> ");
+            window_puts("debug", rv32i_instruction_to_str(current_ir));
         }
         else if (breakpoints[i].type == BREAKPOINT_TYPE_MEM && interacted_address == breakpoints[i].address) {
         	cpu_running = false;
@@ -33,20 +40,32 @@ void breakpoint_tick(void) {
 }
 
 static void breakpoint_cmd(char *arg) {
-    breakpoints = srealloc(breakpoints, ++breakpoints_size * sizeof(*breakpoints));
+	struct breakpoint breakpoint;
 
 	if (!strcmp(arg, "pc")) {
-		breakpoints[breakpoints_size - 1].type = BREAKPOINT_TYPE_PC;
+		breakpoint.type = BREAKPOINT_TYPE_PC;
 	}
 	else if (!strcmp(arg, "mem")) {
-		breakpoints[breakpoints_size - 1].type = BREAKPOINT_TYPE_MEM;
+		breakpoint.type = BREAKPOINT_TYPE_MEM;
 	}
     
     char *address = strtok(NULL, " ");
-    if (!strcmp(address, "pc")) breakpoints[breakpoints_size - 1].address = state.pc;
-    else if (!strcmp(address, "ia")) breakpoints[breakpoints_size - 1].address = interacted_address;
-    else breakpoints[breakpoints_size - 1].address = str_literal_to_ul(address);
-    
+    if (!strcmp(address, "pc")) 		breakpoint.address = state.pc;
+    else if (!strcmp(address, "ia")) 	breakpoint.address = interacted_address;
+    else 								breakpoint.address = str_literal_to_ul(address);
+    breakpoint.occupied = true;
+
+	for (size_t i = 0; i < breakpoints_size; i++) {
+		if (!breakpoints[i].occupied) {
+			breakpoints[i] = breakpoint;
+			goto done;
+		}
+	}
+
+    breakpoints = srealloc(breakpoints, ++breakpoints_size * sizeof(*breakpoints));
+	breakpoints[breakpoints_size - 1] = breakpoint;
+
+done:    
     window_puts("debug","Breakpoint added");
     find_window("debug")->dirty = true;
 }
@@ -68,10 +87,21 @@ static void breakpoint_pop_cmd(char *arg) {
     }
 }
 
+static void breakpoint_rm_cmd(char *arg) {
+	for (size_t i = 0; i < breakpoints_size; i++) {
+		if (breakpoints[i].address == str_literal_to_ul(arg)) {
+			breakpoints[i].occupied = false;
+			return;
+		}
+	}
+	window_puts("debug", "Breakpoint not found");
+	find_window("debug")->dirty = true;
+}
+
 static void breakpoint_ls_cmd(void) {
     for (size_t i = 0; i < breakpoints_size; i++) {
     	char buf[128];
-    	snprintf(buf, sizeof(buf), "%s %x", breakpoints[i].type == BREAKPOINT_TYPE_PC ? "BREAKPOINT_TYPE_PC" : "BREAKPOINT_TYPE_MEM", breakpoints[i].address);
+    	snprintf(buf, sizeof(buf), "%d %s %x", breakpoints[i].occupied, breakpoints[i].type == BREAKPOINT_TYPE_PC ? "BREAKPOINT_TYPE_PC" : "BREAKPOINT_TYPE_MEM", breakpoints[i].address);
         window_puts("debug", buf);
     }
 }
@@ -79,6 +109,8 @@ static void breakpoint_ls_cmd(void) {
 static void breakpoint_step_cmd(char *arg) {
     for (unsigned long i = 0; i < (arg ? str_literal_to_ul(arg) : 1); i++) {
         cpu_step();
+        window_puts("debug", " >> ");
+        window_puts("debug", rv32i_instruction_to_str(current_ir));
     }
 }
 
@@ -93,6 +125,9 @@ void handle_break_command(char *cmd) {
 
     if (!strncmp(subcommand, "pop", 3)) {
         breakpoint_pop_cmd(strtok(NULL, " "));
+    }
+    else if (!strncmp(subcommand, "rm", 2)) {
+    	breakpoint_rm_cmd(strtok(NULL, " "));
     }
     else if (!strncmp(subcommand, "ls", 2)) {
         breakpoint_ls_cmd();

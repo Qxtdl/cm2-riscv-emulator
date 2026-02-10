@@ -32,7 +32,7 @@ int random_int(int min, int max) {
     return min + rand() % (max + 1  - min);
 }
 
-const char *u32_to_hex(uint32_t value) {
+char *u32_to_hex(uint32_t value) {
     static const char lookup[] = "0123456789ABCDEF";
     static char buf[9];
     for (int i = 0; i < 8; i++) {

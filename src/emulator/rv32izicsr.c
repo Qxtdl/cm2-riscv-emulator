@@ -2,6 +2,7 @@
 
 #include "rv32izicsr.h"
 
+uint32_t current_ir;
 uint32_t interacted_address;
 
 void RV32IZicsr_InitState(struct RV32IZicsr_State *state) {
@@ -15,6 +16,7 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
    uint32_t ir;
 
    ir = RV32IZicsr_LoadU32(image, pc); 
+	current_ir = ir;
 
    uint8_t opcode = ir & 0x7f;
    uint8_t funct3 = (ir >> 12) & 0x7;

@@ -51,11 +51,11 @@ static void breakpoint_cmd(char *arg) {
 		breakpoint.type = BREAKPOINT_TYPE_MEM;
 	}
     
-   char *address = strtok(NULL, " ");
-   if (!strcmp(address, "pc")) 			breakpoint.address = state.pc;
-   else if (!strcmp(address, "ia")) 	breakpoint.address = interacted_address;
-   else 								breakpoint.address = str_literal_to_ul(address);
-   breakpoint.occupied = true;
+	char *address = strtok(NULL, " ");
+	if (!strcmp(address, "pc")) 		breakpoint.address = state.pc;
+	else if (!strcmp(address, "ia")) 	breakpoint.address = interacted_address;
+	else 								breakpoint.address = str_literal_to_ul(address);
+	breakpoint.occupied = true;
 
 	for (size_t i = 0; i < breakpoints_size; i++) {
 		if (!breakpoints[i].occupied) {

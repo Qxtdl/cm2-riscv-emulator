@@ -14,6 +14,7 @@
 
 #ifdef RAYLIB
 #include "emulator/mmio/tilegpu.h"
+#include "emulator/mmio/spritegpu.h"
 #endif
 
 #include "emulator/mmio/disk.h"
@@ -76,6 +77,7 @@ int main(int argc, char **argv) {
         Tty_Tick();
         #ifdef RAYLIB
         TileGpu_Tick();
+        SpriteGpu_Tick();
         #endif
         if (cpu_running) {
             for (int i = 0; i < cpu_speed; i++)

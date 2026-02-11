@@ -1,14 +1,16 @@
-//dont compile if raylib is not defined
 #ifdef RAYLIB
 
 #include <raylib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 
+#include "../../util.h"
 #include "mmio_map.h"
 
 #define SCREEN_Y_SIZE 256
 #define SCREEN_X_SIZE 256
+
 int scale = 4;
 
 Texture tilesheet;
@@ -29,16 +31,42 @@ static uint16_t tilegpu_addr;
 static uint8_t tilegpu_fx_opcode;
 static uint16_t tilegpu_fx_imm;
 
-static uint16_t framebuffer[SCREEN_Y_SIZE][SCREEN_X_SIZE] = {0};
+struct drawcall {
+    uint8_t x;
+    uint8_t y;
+    uint16_t tile_id;
+} *drawcalls = NULL;
+size_t drawcalls_size = 0;
+
+static void push_drawcall(struct drawcall drawcall) {
+    drawcalls = srealloc(drawcalls, ++drawcalls_size * sizeof(struct drawcall));
+    drawcalls[drawcalls_size - 1] = drawcall;
+}
+
+static struct drawcall pop_drawcall(void) {
+    static size_t pop_index = 0;
+    if (pop_index == drawcalls_size) {
+        drawcalls = NULL;
+        drawcalls_size = 0;
+        pop_index = 0;
+        free(drawcalls);
+        return (struct drawcall){};
+    }
+    return drawcalls[pop_index++];
+}
 
 void TileGpu_Tick(void) {
-    BeginDrawing();
+    if (drawcalls_size >= 1) {
+        BeginDrawing();
 
-    for (int i = 0; i < SCREEN_Y_SIZE - 1; i++) {
-        for (int j = 0; j < SCREEN_X_SIZE - 1; j++) {
-            Rectangle sourceTile = { framebuffer[i][j] * 8, ((framebuffer[i][j]) >> 5) * 8, (float)8, (float)8 };
+        struct drawcall drawcall;
+        while (1) {
+            drawcall = pop_drawcall();
+            if (drawcalls_size == 0) break;
+
+            Rectangle sourceTile = { drawcall.tile_id * 8, ((drawcall.tile_id) >> 5) * 8, (float)8, (float)8 };
             Rectangle dest = {0.0f, 0.0f, (float)tilesheet.width/scale, (float)tilesheet.height/scale};
-            Vector2 origin = {-j * 64, -i * 64};
+            Vector2 origin = {-drawcall.x * 64, -drawcall.y * 64};
 
             DrawTexturePro(
                 tilesheet,
@@ -48,9 +76,9 @@ void TileGpu_Tick(void) {
                 0,
                 WHITE);
         }
-    }
 
-    EndDrawing();
+        EndDrawing();
+    }
 }
 
 bool TileGpu_OffsetInteraction(uint32_t offset) {
@@ -65,10 +93,9 @@ bool TileGpu_OffsetInteraction(uint32_t offset) {
 
 static void draw(uint8_t controls) {
     if (controls == TILEGPU_DRAW) {
-        framebuffer[tilegpu_y][tilegpu_x] = tilegpu_addr;
+        push_drawcall((struct drawcall){.x = tilegpu_x, .y = tilegpu_y, .tile_id = tilegpu_addr});
     }
     else if (controls == TILEGPU_CLEAR) {
-        memset(framebuffer, 0, SCREEN_X_SIZE * SCREEN_Y_SIZE);
         ClearBackground(BLACK);
     }
 }

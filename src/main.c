@@ -7,6 +7,7 @@
 
 #include "console/console/console.h"
 #include "console/debug.h"
+#include "console/breakpoint.h"
 
 #include "emulator/rv32izicsr.h"
 #include "emulator/mmio/tty.h"
@@ -35,6 +36,7 @@ int cpu_speed = 10000; // the default speed of taurus is 5 ?
 uint8_t *image = NULL;
 
 void cpu_step(void) {
+    breakpoint_tick();
     RV32IZicsr_Step(&state, image);
 }
 
@@ -79,6 +81,7 @@ int main(int argc, char **argv) {
             for (int i = 0; i < cpu_speed; i++)
             {
                 cpu_step();
+                if (!cpu_running) break;
             }
         }
     }

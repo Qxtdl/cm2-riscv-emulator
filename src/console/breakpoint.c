@@ -26,14 +26,16 @@ void breakpoint_tick(void) {
     if (!cpu_running) return;
     for (size_t i = 0; i < breakpoints_size; i++) {
     	if (!breakpoints[i].occupied) continue;
-        if (breakpoints[i].type == BREAKPOINT_TYPE_PC && state.pc == breakpoints[i].address) {
-            cpu_running = false;
-            window_puts("debug", "PC breakpoint hit");
-            window_puts("debug", " >> ");
-            window_puts("debug", rv32i_instruction_to_str(current_ir));
+      	if (breakpoints[i].type == BREAKPOINT_TYPE_PC && state.pc == breakpoints[i].address) {
+           	cpu_running = false;
+           	window_puts("debug", "PC breakpoint hit");
+	           
+           	char buf[128];
+        	snprintf(buf, sizeof(buf), " >>\t%s", rv32i_instruction_to_str(current_ir));
+        	window_puts("debug", buf);
         }
         else if (breakpoints[i].type == BREAKPOINT_TYPE_MEM && interacted_address == breakpoints[i].address) {
-        	cpu_running = false;
+			cpu_running = false;
 			window_puts("debug", "Memory breakpoint hit");
         }
     }
@@ -49,11 +51,11 @@ static void breakpoint_cmd(char *arg) {
 		breakpoint.type = BREAKPOINT_TYPE_MEM;
 	}
     
-    char *address = strtok(NULL, " ");
-    if (!strcmp(address, "pc")) 		breakpoint.address = state.pc;
-    else if (!strcmp(address, "ia")) 	breakpoint.address = interacted_address;
-    else 								breakpoint.address = str_literal_to_ul(address);
-    breakpoint.occupied = true;
+   char *address = strtok(NULL, " ");
+   if (!strcmp(address, "pc")) 			breakpoint.address = state.pc;
+   else if (!strcmp(address, "ia")) 	breakpoint.address = interacted_address;
+   else 								breakpoint.address = str_literal_to_ul(address);
+   breakpoint.occupied = true;
 
 	for (size_t i = 0; i < breakpoints_size; i++) {
 		if (!breakpoints[i].occupied) {
@@ -62,7 +64,7 @@ static void breakpoint_cmd(char *arg) {
 		}
 	}
 
-    breakpoints = srealloc(breakpoints, ++breakpoints_size * sizeof(*breakpoints));
+	breakpoints = srealloc(breakpoints, ++breakpoints_size * sizeof(*breakpoints));
 	breakpoints[breakpoints_size - 1] = breakpoint;
 
 done:    
@@ -71,20 +73,20 @@ done:
 }
 
 static void breakpoint_pop_cmd(char *arg) {
-    if (breakpoints_size == 0) {
-        window_puts("debug","Break stack empty.");
-        find_window("debug")->dirty = true;
-        return;
-    }
-    if (arg && !strcmp(arg, "all")) {
-    	breakpoints = NULL;
-    	breakpoints_size = 0;
-    	return;
-    }
-    for (unsigned long i = 0; i < (arg ? str_literal_to_ul(arg) : 1); i++) {
-    	if (breakpoints_size == 1) { breakpoints = NULL; breakpoints_size--; }
+	if (breakpoints_size == 0) {
+	    window_puts("debug","Break stack empty.");
+	    find_window("debug")->dirty = true;
+	    return;
+	}
+	if (arg && !strcmp(arg, "all")) {
+		breakpoints = NULL;
+		breakpoints_size = 0;
+		return;
+	}
+	for (unsigned long i = 0; i < (arg ? str_literal_to_ul(arg) : 1); i++) {
+		if (breakpoints_size == 1) { breakpoints = NULL; breakpoints_size--; }
     	else breakpoints = srealloc(breakpoints, --breakpoints_size * sizeof(*breakpoints));
-    }
+   }
 }
 
 static void breakpoint_rm_cmd(char *arg) {
@@ -100,6 +102,7 @@ static void breakpoint_rm_cmd(char *arg) {
 
 static void breakpoint_ls_cmd(void) {
     for (size_t i = 0; i < breakpoints_size; i++) {
+    	if (!breakpoints[i].occupied) continue;
     	char buf[128];
     	snprintf(buf, sizeof(buf), "%d %s %x", breakpoints[i].occupied, breakpoints[i].type == BREAKPOINT_TYPE_PC ? "BREAKPOINT_TYPE_PC" : "BREAKPOINT_TYPE_MEM", breakpoints[i].address);
         window_puts("debug", buf);
@@ -109,14 +112,16 @@ static void breakpoint_ls_cmd(void) {
 static void breakpoint_step_cmd(char *arg) {
     for (unsigned long i = 0; i < (arg ? str_literal_to_ul(arg) : 1); i++) {
         cpu_step();
-        window_puts("debug", " >> ");
-        window_puts("debug", rv32i_instruction_to_str(current_ir));
+        
+        char buf[128];
+        snprintf(buf, sizeof(buf), " >> %s", rv32i_instruction_to_str(current_ir));
+        window_puts("debug", buf);
     }
 }
 
 static void break_continue_cmd(void) {
 	cpu_step();
-    cpu_running = true;
+	cpu_running = true;
 }
 
 void handle_break_command(char *cmd) {

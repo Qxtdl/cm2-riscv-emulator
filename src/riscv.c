@@ -142,7 +142,7 @@ char *rv32i_instruction_to_str(uint32_t instruction) {
          strcat(assembly, u32_to_hex(i_imm));
          break;
       }
-      default: strcat(assembly, "unknown instruction");
+      default: strcat(assembly, u32_to_hex(ir));
    }	
    return assembly;	
 }

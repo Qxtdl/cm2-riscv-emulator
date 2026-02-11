@@ -90,6 +90,4 @@ void debug_console_tick(void) {
             window_putc("debug", ch);
         }
     }
-
-    breakpoint_tick();
 }

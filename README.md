@@ -27,6 +27,7 @@ The emulator has a debugger console that can be accessed by pressing `ctrl+w`.
 | `break rm <address>` | remove the breakpoint with that address |
 | `break continue` | continue exectution from a breakpoint |
 | `break <type (pc or mem)> <address>` | add a breakpoint at the address given with type, accepts hex, binary and decimal. |
+| `break step <n>` | step cpu n cycles |
 | `break ls` | list breakpoints |
 | `cpu speed <speed>` | configure the speed of the cpu. |
 | `cpu jmp <address>` | make the cpu jump to the address in memory |

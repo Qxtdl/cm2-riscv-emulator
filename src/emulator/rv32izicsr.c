@@ -2,6 +2,9 @@
 
 #include "rv32izicsr.h"
 
+#include "../console/console/window.h"
+
+extern bool cpu_running;
 uint32_t current_ir;
 uint32_t interacted_address;
 
@@ -140,6 +143,11 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
          pc = pc + 4;
          break;
       }
+      case 0x73: // EBREAK
+         cpu_running = false;
+         window_puts("debug", "EBREAK instruction hit");
+         find_window("debug")->dirty = true;
+         break;
       default: pc = pc + 4; break;
    }
 

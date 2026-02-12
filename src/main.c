@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "emulator/mmio/mmio_map.h"
 #include "global.h"
 #include "util.h"
 
@@ -13,6 +14,7 @@
 #include "emulator/mmio/tty.h"
 
 #ifdef RAYLIB
+#include "emulator/screen.h"
 #include "emulator/mmio/tilegpu.h"
 #include "emulator/mmio/spritegpu.h"
 #endif
@@ -55,21 +57,23 @@ int main(int argc, char **argv) {
     load_bin_file(argv[1], image, RV32IZicsr_RAM_SIZE);
     RV32IZicsr_InitState(&state);
 
+    Screen_Init();
+
     /* Init MMIO Devices */
     Tty_Init();
 
     /* Init TileGPU and Disk */
     #ifdef RAYLIB
-    if (argc == 4) {
+    if (argc == 5) {
         TileGpu_Init(argv[2]);
         Disk_LoadBin(argv[3]);
+        SpriteGpu_Init(argv[4]);
     } else if (argc == 3)
         Disk_LoadBin(argv[2]);
     #else
     if (argc == 3)
         Disk_LoadBin(argv[2]);
     #endif
-
     while (1) {
         console_tick();
         debug_console_tick();

@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 
-extern int scale;
-
 void TileGpu_Init(const char *bitmap_filename);
 void TileGpu_Tick(void);
 bool TileGpu_OffsetInteraction(uint32_t offset);

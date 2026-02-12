@@ -7,19 +7,11 @@
 
 #include "../../util.h"
 #include "mmio_map.h"
-
-#define SCREEN_Y_SIZE 256
-#define SCREEN_X_SIZE 256
-
-int scale = 4;
+#include "../screen.h"
 
 Texture tilesheet;
 
 void TileGpu_Init(const char *bitmap_filename) {
-    InitWindow(SCREEN_X_SIZE * scale, SCREEN_Y_SIZE * scale, "TileGPU");
-    SetTargetFPS(60);
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
-
     Image image = LoadImage(bitmap_filename);
     tilesheet = LoadTextureFromImage(image);
     UnloadImage(image);
@@ -31,12 +23,12 @@ static uint16_t tilegpu_addr;
 static uint8_t tilegpu_fx_opcode;
 static uint16_t tilegpu_fx_imm;
 
-struct drawcall {
+static struct drawcall {
     uint8_t x;
     uint8_t y;
     uint16_t tile_id;
 } *drawcalls = NULL;
-size_t drawcalls_size = 0;
+static size_t drawcalls_size = 0;
 
 static void push_drawcall(struct drawcall drawcall) {
     drawcalls = srealloc(drawcalls, ++drawcalls_size * sizeof(struct drawcall));
@@ -64,9 +56,9 @@ void TileGpu_Tick(void) {
             drawcall = pop_drawcall();
             if (drawcalls_size == 0) break;
 
-            Rectangle sourceTile = { drawcall.tile_id * 8, ((drawcall.tile_id) >> 5) * 8, (float)8, (float)8 };
-            Rectangle dest = {0.0f, 0.0f, (float)tilesheet.width/scale, (float)tilesheet.height/scale};
-            Vector2 origin = {-drawcall.x * 64, -drawcall.y * 64};
+            Rectangle sourceTile = { drawcall.tile_id * 8, ((drawcall.tile_id) >> 5) * 8, (float)8, (float)8};
+            Rectangle dest = {0.0f, 0.0f, (float)tilesheet.width/(scale*8), (float)tilesheet.height/(scale*8)};
+            Vector2 origin = {(-drawcall.x * 32)/scale, (-drawcall.y * 32)/scale};
 
             DrawTexturePro(
                 tilesheet,

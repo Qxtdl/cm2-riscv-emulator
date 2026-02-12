@@ -1,3 +1,5 @@
 .vscode
 build
 old_binary
+compile_commands.json
+.cache

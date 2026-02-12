@@ -12,6 +12,7 @@
 
 #include "../emulator/rv32izicsr.h"
 #include "../emulator/mmio/tilegpu.h"
+#include "../emulator/screen.h"
 
 #define CMD_SIZE 128
 
@@ -29,6 +30,10 @@ void handle_command(char *cmd) {
         find_window("debug")->ch_x= 1;
         wclear(get_window("debug"));
         update_window("debug");
+    }
+    else if (!strncmp(cmd, "scale", 5)) {
+        char *end;
+        scale = strtof(strtok(NULL, " "), &end);
     }
     else if (!strncmp(cmd, "cpu", 3)) {
         handle_cpu_command(cmd);

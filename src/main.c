@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "emulator/mmio/mmio_map.h"
+//#include "emulator/mmio/mmio_map.h"
 #include "global.h"
 #include "util.h"
 
@@ -10,16 +10,13 @@
 #include "console/debug.h"
 #include "console/breakpoint.h"
 
-#include "emulator/rv32izicsr.h"
-#include "emulator/mmio/tty.h"
+#include "emulator/arch.h"
 
 #ifdef RAYLIB
 #include "emulator/screen.h"
-#include "emulator/mmio/tilegpu.h"
-#include "emulator/mmio/spritegpu.h"
 #endif
 
-#include "emulator/mmio/disk.h"
+#include "cpulog.h"
 
 static void load_bin_file(const char *filename, void *dest, size_t dest_size) {
     FILE *fptr = fopen(filename, "r");
@@ -33,60 +30,52 @@ static void load_bin_file(const char *filename, void *dest, size_t dest_size) {
     fclose(fptr);
 }
 
-struct RV32IZicsr_State state;
-bool cpu_running = true;
+// struct RV32IZicsr_State state;
+bool cpu_running = false;
 int cpu_speed = 10000; // the default speed of taurus is 5 ?
 uint8_t *image = NULL;
 
 void cpu_step(void) {
     breakpoint_tick();
-    RV32IZicsr_Step(&state, image);
+    selected_cpu->step(image);
 }
 
 int main(int argc, char **argv) {
     if (argc <= 1) {
-        quick_abort("Usage: cm2-riscv-emulator <Filepath to initial .bin> <Filepath to tilegpu .bmp> <Filepath to disk .bin image>")
+        quick_abort("Usage: cm2-riscv-emulator <arch> <Filepath to initial .bin> <Filepath to tilegpu .bmp> <Filepath to disk .bin image>")
     }
 
-    image = scalloc(1, RV32IZicsr_RAM_SIZE);
+    select_cpu(argv[1]);
+    if (!selected_cpu) {
+        quick_abort("Invalid CPU selection.")
+    }
 
     /* Init Console */
     console_create_windows();
 
-    /* Init RV32I */
-    load_bin_file(argv[1], image, RV32IZicsr_RAM_SIZE);
-    RV32IZicsr_InitState(&state);
+    /* Init selected CPU */
+    image = scalloc(1, selected_cpu->ram_size);
+    
+    load_bin_file(argv[2], image, selected_cpu->ram_size);
 
-    Screen_Init();
-
-    /* Init MMIO Devices */
-    Tty_Init();
-
-    /* Init TileGPU and Disk */
     #ifdef RAYLIB
-    if (argc == 5) {
-        TileGpu_Init(argv[2]);
-        Disk_LoadBin(argv[3]);
-        SpriteGpu_Init(argv[4]);
-    } else if (argc == 3)
-        Disk_LoadBin(argv[2]);
-    #else
-    if (argc == 3)
-        Disk_LoadBin(argv[2]);
+    Screen_Init();
     #endif
+
+    selected_cpu->init(image);
+    selected_cpu->sys_init(&(void *[]){&argc, &argv});
+
     while (1) {
         console_tick();
         debug_console_tick();
         
-        Tty_Tick();
-        #ifdef RAYLIB
-        TileGpu_Tick();
-        SpriteGpu_Tick();
-        #endif
+        selected_cpu->sys_tick(NULL);
+
         if (cpu_running) {
             for (int i = 0; i < cpu_speed; i++)
             {
                 cpu_step();
+                cpu_logger_cycle();
                 if (!cpu_running) break;
             }
         }

@@ -5,10 +5,10 @@
 #include <stdint.h>
 #include <dirent.h>
 
-#include "../../global.h"
-#include "../../util.h"
+#include "../../../global.h"
+#include "../../../util.h"
 #include "mmio_map.h"
-#include "../screen.h"
+#include "../../screen.h"
 
 Texture *sprites = NULL;
 size_t sprites_size = 0;

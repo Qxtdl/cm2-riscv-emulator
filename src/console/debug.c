@@ -7,23 +7,25 @@
 #include "console/window.h"
 #include "console/console.h"
 
+#include "../emulator/arch.h"
+
 #include "breakpoint.h"
 #include "cpu.h"
+#include "logger.h"
 
-#include "../emulator/rv32izicsr.h"
-#include "../emulator/mmio/tilegpu.h"
 #include "../emulator/screen.h"
 
 #define CMD_SIZE 128
 
-extern uint8_t *image;
-extern struct RV32IZicsr_State state;
 extern int cpu_speed;
 
 void handle_command(char *cmd) {
     if (!strcmp(cmd, "exit")) {
         endwin();
         exit(0);
+    }
+    else if (!strncmp(cmd, "logger", 6)) {
+        handle_logger_command(cmd);
     }
     else if (!strcmp(cmd, "clear")) {
         find_window("debug")->ch_y = 1;
@@ -43,17 +45,14 @@ void handle_command(char *cmd) {
     }
 }
 
-/*
-    Making a new file for the registers window is overkill,
-    so settle with this
-*/
 static void registers_window_tick(void) {
     char buf[128];
-    for (unsigned int i = 0; i < sizeof(state.regs)/sizeof(state.regs[0]); i++) {
-        snprintf(buf, sizeof(buf), "x%d\t0x%08x", i, state.regs[i]);
+    arch_register_t arch_register;
+    for (; (arch_register = selected_cpu->next_arch_register()).name;) {
+        snprintf(buf, sizeof(buf), "%s\t0x%08x", arch_register.name, arch_register.value);
         window_puts("registers", buf);
     }
-    snprintf(buf, sizeof(buf), "pc\t0x%08x", state.pc);
+    snprintf(buf, sizeof(buf), "pc\t0x%08x", selected_cpu->get_pc());
     window_puts("registers", buf);
     find_window("registers")->ch_y = 1;
 }
@@ -62,8 +61,8 @@ static void favmem_window_tick(void) {
     int i = 0;
     for (int y = 0; y < find_window("favmem")->height; y++) {
         for (int x = 0; x < find_window("favmem")->width; x++) {
-            mvwaddch(get_window("favmem"), y, x, image[(interacted_address + (i++)) & RV32IZicsr_RAM_MASK]);
-        }        
+            mvwaddch(get_window("favmem"), y, x, selected_cpu->image[(selected_cpu->get_mar() + (i++)) & 0xFFFF]); // ffff won't work on 32 bit
+        }
     }
 }
 

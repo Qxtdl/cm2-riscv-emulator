@@ -1,9 +1,9 @@
 #include "rv32izicsr.h"
 
-#include "mmio/tty.h"
-#include "mmio/rng.h"
-#include "mmio/disk.h"
-#include "mmio/tilegpu.h"
+#include "../mmio/taurus/tty.h"
+#include "../mmio/taurus/rng.h"
+#include "../mmio/taurus/disk.h"
+#include "../mmio/taurus/tilegpu.h"
 
 uint32_t External_RV32IZicsr_LoadHandlerU8(uint8_t *image, uint32_t offset) {
     if (Tty_OffsetInteraction(offset)) {

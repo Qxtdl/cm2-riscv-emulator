@@ -2,9 +2,10 @@
 
 #include "../util.h"
 #include "console/console.h"
-#include "../emulator/rv32izicsr.h"
 
-extern struct RV32IZicsr_State state;
+#include "../emulator/arch.h"
+#include "../emulator/taurus/rv32izicsr.h"
+
 extern int cpu_speed;
 
 static void cpu_speed_cmd(char *arg) {
@@ -12,7 +13,7 @@ static void cpu_speed_cmd(char *arg) {
 }
 
 static void cpu_jmp_cmd(char *arg) {
-    state.pc = str_literal_to_ul(arg);
+    selected_cpu->set_pc(str_literal_to_ul(arg));
 }
 
 void handle_cpu_command(char *cmd) {

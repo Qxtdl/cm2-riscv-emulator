@@ -2,11 +2,9 @@
 
 #include "rv32izicsr.h"
 
-#include "../console/console/window.h"
+#include "../../console/console/window.h"
 
 extern bool cpu_running;
-uint32_t current_ir;
-uint32_t interacted_address;
 
 void RV32IZicsr_InitState(struct RV32IZicsr_State *state) {
    memset(state, 0, sizeof(*state));
@@ -19,7 +17,7 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
    uint32_t ir;
 
    ir = RV32IZicsr_LoadU32(image, pc); 
-	current_ir = ir;
+   state->ir = ir; // cosmetic
 
    uint8_t opcode = ir & 0x7f;
    uint8_t funct3 = (ir >> 12) & 0x7;
@@ -76,7 +74,7 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
          break;
       case 0x03: { // Load
          uint32_t addr = rs1val + i_imm;
-         interacted_address = addr;
+         state->mar = addr; // cosmetic
          if (rd) {
             switch (funct3) {
                case 0: 
@@ -99,7 +97,7 @@ void RV32IZicsr_Step(struct RV32IZicsr_State *state, uint8_t *image) {
       }
       case 0x23: { // Store
          uint32_t addr = rs1val + s_imm;
-         interacted_address = addr;
+         state->mar = addr; // cosmetic
          switch (funct3) {
             case 0: RV32IZicsr_StoreU8(image, addr, rs2val); break;
             case 1: 

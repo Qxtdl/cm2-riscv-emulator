@@ -3,13 +3,11 @@
 
 #include "../util.h"
 #include "console/console.h"
-#include "../emulator/rv32izicsr.h"
 
-#include "../riscv.h"
+#include "../emulator/arch.h"
 
 extern void cpu_step(void);
 
-extern struct RV32IZicsr_State state;
 extern bool cpu_running;
 
 struct breakpoint {
@@ -26,15 +24,15 @@ void breakpoint_tick(void) {
     if (!cpu_running) return;
     for (size_t i = 0; i < breakpoints_size; i++) {
     	if (!breakpoints[i].occupied) continue;
-      	if (breakpoints[i].type == BREAKPOINT_TYPE_PC && state.pc == breakpoints[i].address) {
+      	if (breakpoints[i].type == BREAKPOINT_TYPE_PC && selected_cpu->get_pc() == breakpoints[i].address) {
            	cpu_running = false;
            	window_puts("debug", "PC breakpoint hit");
 	           
            	char buf[128];
-        	snprintf(buf, sizeof(buf), " >>\t%s", rv32i_instruction_to_str(current_ir));
+        	snprintf(buf, sizeof(buf), " >>\t%s", instruction_to_str(selected_cpu->get_ir()));
         	window_puts("debug", buf);
         }
-        else if (breakpoints[i].type == BREAKPOINT_TYPE_MEM && interacted_address == breakpoints[i].address) {
+        else if (breakpoints[i].type == BREAKPOINT_TYPE_MEM && selected_cpu->get_mar() == breakpoints[i].address) {
 			cpu_running = false;
 			window_puts("debug", "Memory breakpoint hit");
         }
@@ -52,8 +50,8 @@ static void breakpoint_cmd(char *arg) {
 	}
     
 	char *address = strtok(NULL, " ");
-	if (!strcmp(address, "pc")) 		breakpoint.address = state.pc;
-	else if (!strcmp(address, "ia")) 	breakpoint.address = interacted_address;
+	if (!strcmp(address, "pc")) 		breakpoint.address = selected_cpu->get_pc();
+	else if (!strcmp(address, "ia")) 	breakpoint.address = selected_cpu->get_mar();
 	else 								breakpoint.address = str_literal_to_ul(address);
 	breakpoint.occupied = true;
 
@@ -114,7 +112,7 @@ static void breakpoint_step_cmd(char *arg) {
         cpu_step();
         
         char buf[128];
-        snprintf(buf, sizeof(buf), " >> %s", rv32i_instruction_to_str(current_ir));
+        snprintf(buf, sizeof(buf), " >> %s", instruction_to_str(selected_cpu->get_ir()));
         window_puts("debug", buf);
     }
 }

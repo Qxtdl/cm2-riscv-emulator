@@ -5,9 +5,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "../../util.h"
+#include "../../../util.h"
 #include "mmio_map.h"
-#include "../screen.h"
+#include "../../screen.h"
 
 Texture tilesheet;
 

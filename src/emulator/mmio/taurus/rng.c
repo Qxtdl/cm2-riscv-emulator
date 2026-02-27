@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "../../util.h"
+#include "../../../util.h"
 #include "mmio_map.h"
 
 bool Rng_OffsetInteraction(uint32_t offset) {

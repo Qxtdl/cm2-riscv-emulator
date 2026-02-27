@@ -3,7 +3,7 @@
 #include "tty.h"
 #include "mmio_map.h"
 
-#include "../../console/console/console.h"
+#include "../../../console/console/console.h"
 
 void Tty_Init(void) {
     // initscr();

@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror -lncurses -fsanitize=address \
-	-Wno-error=unused-variable -Wno-error=unused-parameter -Wno-error=parentheses -Wno-error=unused-function
+	-Wno-error=unused-variable -Wno-error=unused-parameter -Wno-error=parentheses -Wno-error=unused-function -Wno-error=switch
 
 RAYLIB ?= true
-OPTIMIZE ?= true
+OPTIMIZE ?= false
 
 ifeq ($(RAYLIB), true)
 	CFLAGS += -lraylib -DRAYLIB
@@ -16,7 +16,7 @@ endif
 ROOT ?= .
 BUILD = $(ROOT)/build
 OUTPUT = $(BUILD)/cm2-riscv-emulator
-OUTPUT_ARGS ?= emulator-bin/minesweeper.bin emulator-tilesheet/minesweeper.bmp disk_dump.bin emulator-sprites
+OUTPUT_ARGS ?= taurus emulator-bin/minesweeper.bin emulator-tilesheet/minesweeper.bmp disk_dump.bin emulator-sprites
 
 CSRCS = $(shell find $(ROOT)/src -name '*.c')
 RELCSRCS = $(patsubst $(ROOT)/%,%,$(CSRCS))

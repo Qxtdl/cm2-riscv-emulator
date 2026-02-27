@@ -31,6 +31,12 @@ The emulator has a debugger console that can be accessed by pressing `ctrl+w`.
 | `break ls` | list breakpoints |
 | `cpu speed <speed>` | configure the speed of the cpu. |
 | `cpu jmp <address>` | make the cpu jump to the address in memory |
+| `cpu rw <value> <register>` | write a value to the architectural register |
+| `logger init` | initalize the cpu logger |
+| `logger toggle` | toggle the log feature (not snapshotting) |
+| `logger flush` | flush the recorded cpu cycles |
+| `logger save <mem> <state>` | save the cpu mem state in mem, and save cpu state in state |
+| `logger load <mem> <state>` | load the cpu mem state from mem, and load cpu state from state |
 
 
 | Variable | Description | Usage |

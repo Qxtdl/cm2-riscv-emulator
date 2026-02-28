@@ -59,6 +59,14 @@
 #define DISK_OUT (0xFFC4)
 #define DISK_WRITE (0xFFC3)
 
+// Emulator TTY Console 2
+#define EM_ONLY_TTY2_LOC     (0xFFC2)        // TTY Console Location
+#define EM_ONLY_TTY2_CHAR    (0xFFC1)        // TTY Console Location
+#define EM_ONLY_TTY2_WRITE   (0xFFC0)        // Write to TTY Console
+#define EM_ONLY_TTY2_CLEAR   (0xFFBF)        // Clear TTY Console
+#define EM_ONLY_TTY2_USER_READY (0xFFBE)
+#define EM_ONLY_TTY2_USER_ASCII (0xFFBD)
+
 // Sprite GPU
 #define SPRITEGPU_SPRITE (0xFFC2)
 #define SPRITEGPU_WRITE (0xFFC1)

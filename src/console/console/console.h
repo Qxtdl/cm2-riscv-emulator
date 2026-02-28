@@ -6,6 +6,7 @@
 
 extern enum focused_window {
     FOCUSED_WINDOW_TTY,
+    FOCUSED_WINDOW_TTY2,
     FOCUSED_WINDOW_DBG_CONSOLE,
     FOCUSED_WINDOW_MAX
 } current_focused_window;

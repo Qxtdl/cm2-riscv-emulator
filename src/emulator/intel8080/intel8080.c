@@ -174,9 +174,8 @@ void Intel8080_Step(struct Intel8080_State *state, uint8_t *image) {
     }
 
     uint8_t rst_vector = 0b00111000;
-    switch (ir & rst_vector) {
-        case 0b11000111: (mar = state->sp -= 2); Intel8080_StoreU16(image, state->sp, pc + 1); pc = ir & rst_vector; break; // RST
-        //default:;
+    if ((ir & ~(rst_vector)) == 0b11000111) { // RST
+        (mar = state->sp -= 2); Intel8080_StoreU16(image, state->sp, pc + 1); pc = ir & rst_vector;
     }
 
     switch (ir) {
@@ -239,7 +238,10 @@ void Intel8080_Step(struct Intel8080_State *state, uint8_t *image) {
         case 0b11110000: if (!state->s) { pc = Intel8080_LoadU16(image, state->sp); state->sp += 2; } else pc += 1; break; // RP
         case 0b11101000: if (state->p) { pc = Intel8080_LoadU16(image, state->sp); state->sp += 2; } else pc += 1; break; // RPE
         case 0b11100000: if (!state->p) { pc = Intel8080_LoadU16(image, state->sp); state->sp += 2; } else pc += 1; break; // RPO
-        //default:;
+        case 0b11111011: pc += 1; break; // EI
+        case 0b11110011: pc += 1; break; // DI
+        case 0b11011011: pc += 2; break; // IN
+        case 0b11010011: pc += 2; break; // OUT
     }
 
     state->mar = mar; // cosmetic

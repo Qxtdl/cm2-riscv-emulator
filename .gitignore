@@ -1,5 +1,6 @@
-.vscode
-build
-old_binary
-compile_commands.json
 .cache
+.vscode
+basement
+build
+compile_commands
+compile_commands.json

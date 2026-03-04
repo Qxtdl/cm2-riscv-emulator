@@ -98,7 +98,6 @@ static uint8_t Intel8080_Subtract(struct Intel8080_State *state, uint8_t x, uint
     return result;
 }
 
-// TODO: remove //default:;
 void Intel8080_Step(struct Intel8080_State *state, uint8_t *image) {
     uint32_t pc = state->pc;
     uint32_t ir;
@@ -125,7 +124,6 @@ void Intel8080_Step(struct Intel8080_State *state, uint8_t *image) {
         case 0b00000100: WWREG(wdest, RWREG(wdest)+1); Intel8080_Set_SZP(state, RWREG(wdest)); pc += 1; break; // INR
         case 0b00000101: WWREG(wdest, RWREG(wdest)-1); Intel8080_Set_SZP(state, RWREG(wdest)); pc += 1; break; // DCR
         case 0b00000110: WWREG(wdest, limm); pc += 2; break; // MVI
-        //default:;
     }
 
     uint8_t alu_opcode = (ir >> 3) & 0x7;
@@ -170,7 +168,6 @@ void Intel8080_Step(struct Intel8080_State *state, uint8_t *image) {
         case 0b00000001: WDREG(dsrc, imm,  true); pc += 3; break; // LXI
         case 0b00000011: WDREG(dsrc, RDREG(dsrc, true) + 1, true); pc += 1; break; // INX
         case 0b00001011: WDREG(dsrc, RDREG(dsrc, true) - 1, true); pc += 1; break; // DCX
-        //default:;
     }
 
     uint8_t rst_vector = 0b00111000;

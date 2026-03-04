@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <string.h>
 
+#include "../../../emulator/arch.h"
 #include "../../../util.h"
 
 #include "tty.h"
@@ -23,6 +24,9 @@ void Tty_Tick(void) {
     for (int i = 0; i < ttys_size; i++) {
         if (console_window_kbhit(ttys[i].focused_window)) {
             ttys[i].user_ascii = console_window_getch(ttys[i].focused_window);
+            if (ttys[i].user_ascii == '\n' && selected_cpu->id == INTEL8080) {
+                ttys[i].user_ascii = 0x0d; // fuck ncurses
+            }
             ttys[i].user_ready = true;
         }
     }

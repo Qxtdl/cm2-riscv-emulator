@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "util.h"
+#include "../util.h"
 
 #define ASM_BUF_SIZE 128
 

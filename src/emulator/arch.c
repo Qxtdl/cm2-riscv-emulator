@@ -6,7 +6,8 @@
 #include "taurus/arch.h"
 #include "intel8080/arch.h"
 
-#include "../riscv.h"
+#include "../arch/riscv.h"
+#include "../arch/intel8080.h"
 
 cpu_t *selected_cpu = NULL;
 
@@ -35,5 +36,6 @@ const char *instruction_to_str(uint32_t ir) {
     switch (selected_cpu->id) {
         default:
         case TAURUS: return rv32i_instruction_to_str(ir);
+        case INTEL8080: return intel8080_instruction_to_str(ir);
     }
 }

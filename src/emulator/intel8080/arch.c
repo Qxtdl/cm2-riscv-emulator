@@ -40,12 +40,12 @@ void *intel8080_sys_init(void *args) {
     */
 
     CreateTty((struct tty){
-        0xfffb,
-        0Xfffc,
-        0xffff,
-        0xfffe,
-        0xfffd,
-        0xfffa,
+        0xaffb,
+        0xaffc,
+        0xafff,
+        0xaffe,
+        0xaffd,
+        0xaffa,
         .window_name = "tty",
         .focused_window = FOCUSED_WINDOW_TTY
     });
@@ -66,6 +66,7 @@ void *intel8080_step(void *args) {
 }
 
 void *intel8080_sys_tick(void *args) {
+    Tty_Tick();
     return NULL;
 }
 
